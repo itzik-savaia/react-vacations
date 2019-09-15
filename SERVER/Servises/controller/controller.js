@@ -4,6 +4,7 @@ const User = db.user;
 const Role = db.role;
 const vacations = db.vacations;
 const follower = db.follower;
+const File = require('../controller/file.controller');
 
 const Op = db.Sequelize.Op;
 
@@ -116,9 +117,11 @@ exports.adminBoard = (req, res) => {
     })
 }
 
-exports.adminSendFile = (body, file, ) => {
-
+exports.adminSendFile = (body, file, File) => {
     let image = file.name;
+
+    console.log(File, '>>>>>>>>>>>>>>File>>>>>>>>>>>>>>>>sdfsdfsdfsdfsdf');
+
     let { description, destination, fromDate, toDate, price } = body;
     return uploadSql = new Promise((resolve, reject) => {
         resolve(vacations.create({
@@ -128,10 +131,20 @@ exports.adminSendFile = (body, file, ) => {
             toDate: toDate,
             price: price,
             img: image,
+            // imgPath: filePath,
         }));
     });
 
 };
+
+exports.adminDelete = (req, res) => {
+    let id = req.params
+    console.log(id);
+    vacations.destroy({
+        where: { id },
+    });
+
+}
 
 exports.managementBoard = (req, res) => {
     User.findOne({
@@ -176,19 +189,19 @@ exports.allusers = (req, res) => {
         res.status(500).send('Error to find allusers -> ' + err);
     });
 }
-exports.oneusers = (req, res) => {
-    console.log("Processing func -> Get-oneusers");
-    let userId = req.params
-    console.log(userId);
+// exports.oneusers = (req, res) => {
+//     console.log("Processing func -> Get-oneusers");
+//     let userId = req.params
+//     console.log(userId);
 
-    User.findOne({
-        where: { id: req.userId }
-    }).then((users) => {
-        res.send(users)
-        console.log(users);
-    })
+//     User.findbyid({
+//         where: { id: req.userId }
+//     }).then((users) => {
+//         res.send(users)
+//         console.log(users);
+//     })
 
-}
+// }
 
 
 // exports.oneuser = (req, res) => {

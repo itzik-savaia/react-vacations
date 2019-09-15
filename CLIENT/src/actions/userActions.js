@@ -1,78 +1,63 @@
 import { AlertType, UserType } from './types';
 
-export const AlertType = {
-    success,
-    error,
-    clear
-};
+// export const Alert_Type = {
+//     success,
+//     error,
+//     clear
+// };
 
-export const UserType = {
-    login_success,
-    login_fail,
-    login_request,
-
-    User_FOLLOW,
-    User_UNFOLLOW
-};
+// export const User_Type = {
+//     login_success,
+//     login_fail,
+//     login_request,
+//     user_username,
+//     user_password,
+//     user_token
+// };
 
 //alert
 export const success = (message) => {
-    //need to do fach to server
     return { type: AlertType.SUCCESS, message }
 }
 export const error = (message) => {
-    //need to do fach to server
     return { type: AlertType.ERROR, message }
 }
 export const clear = (message) => {
-    //need to do fach to server
     return { type: AlertType.CLEAR, message }
 }
 //alert
-export const fetch_user = () => {
-    return function (dispatch) {
-        Axios.get('http://localhost:4000/vacation')
-            .then(res => {
-                console.log(res);
-                dispatch({ type: FETCH_VACATIONS, payload: res.data });
-            }).catch(err => {
-                console.log(err);
-            })
-    }
-};
+
+
 
 //log in 
 export const login_success = () => {
-    //need to do fach to server
     return function (dispatch) {
-        dispatch({ type: UserType.LOGIN_SUCCESS, payload: LOG_IN });
+        dispatch({ type: UserType.LOGIN_SUCCESS });
     }
 }
-
-
 export const login_request = () => {
-    //need to do fach to server
     return function (dispatch) {
-        dispatch({ type: LOG_OUT, payload: LOG_OUT });
+        dispatch({ type: UserType.REGISTER_REQUEST });
     }
 }
-export const logout_request = () => {
-    //need to do fach to server
+export const login_fail = () => {
     return function (dispatch) {
-        dispatch({ type: LOG_OUT, payload: LOG_OUT });
+        dispatch({ type: UserType.REGISTER_FAILURE });
     }
 }
-//log in 
+//log in
 
-export const User_FOLLOW = (FOLLOW) => {
-    //need to do fach to server
+//user-data
+export const user_username = () => {
+    return  { type: UserType.USER_USERNAME }
+}
+export const user_password = () => {
     return function (dispatch) {
-        dispatch({ type: UserType.FOLLOW, payload: FOLLOW });
+        dispatch({ type: UserType.USER_PASSWORD });
     }
 }
-export const User_UNFOLLOW = (UNFOLLOW) => {
-    //need to do fach to server
+export const user_token = () => {
     return function (dispatch) {
-        dispatch({ type: UserType.UNFOLLOW, payload: UNFOLLOW });
+        dispatch({ type: UserType.USER_TOKEN });
     }
 }

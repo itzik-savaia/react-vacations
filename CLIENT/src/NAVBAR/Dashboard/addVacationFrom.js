@@ -5,6 +5,7 @@ import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
+import CardMedia from "@material-ui/core/CardMedia";
 import axios from 'axios';
 import { array } from 'prop-types';
 
@@ -45,11 +46,14 @@ const useStyles = makeStyles(theme => ({
 }));
 
 
-export default function AddVacationFrom() {
+const AddVacationFrom = (props) => {
     const classes = useStyles();
     const [file, setFile] = useState("");
     const [filename, setFilename] = useState("Choose File");
-    const [uploadedFile, setUploadedFile] = useState({ file });
+    const [uploadedFile, setUploadedFile] = useState({});
+    
+
+
 
     const [description, setDescription] = useState("");
     const [destination, setDestination] = useState("");
@@ -61,7 +65,7 @@ export default function AddVacationFrom() {
         setFile(e.target.files[0]);
         setFilename(e.target.files[0].name);
     }
-    const onSubmitToSend = async e => {
+    var onSubmitToSend = async e => {
         e.preventDefault();
         var formData = new FormData();
         formData.append('file', file);
@@ -73,9 +77,14 @@ export default function AddVacationFrom() {
         formData.append('price', price);
         console.log(Array.from(formData));
         try {
-            const res = await axios.post('http://localhost:4000/users/admin/upload', formData)
+            const res = await axios.post('http://localhost:4000/users/admin/upload', formData,{
+            headers:{'Content-Type':'multipart/form-data'}
+            });
             const { fileName, filePath } = res.data;
             setUploadedFile({ fileName, filePath });
+            console.log('fileName, filePath',res.data);
+            
+            alert('Uploaded'+'-'+fileName)
 
         } catch (err) {
             if (err.response.status === 500) {
@@ -90,6 +99,7 @@ export default function AddVacationFrom() {
         <Container component="main" maxWidth="xs">
 
             <div className={classes.paper}>
+                
                 <Typography component="h1" variant="h5">
                     Add Vacation
                     </Typography>
@@ -176,10 +186,10 @@ export default function AddVacationFrom() {
                                 onChange={onChangeFileName}
                             />
                             <label className="custom-file-label" htmlFor="contained-button-file">
-                            {filename}
+                                {filename}
                             </label>
                         </Grid>
-                                                <Grid item xs={12}>
+                        <Grid item xs={12}>
                             <Button
                                 type="submit"
                                 fullWidth
@@ -188,13 +198,18 @@ export default function AddVacationFrom() {
                                 className={classes.submit}>Upload
 
                         </Button>
+
                         </Grid>
+                        
                     </Grid>
 
 
                 </form>
+
             </div>
+            
         </Container >
 
     );
 }
+export default AddVacationFrom

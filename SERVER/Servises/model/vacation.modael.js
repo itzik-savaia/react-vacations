@@ -1,5 +1,9 @@
 module.exports = (sequelize, Sequelize) => {
     const Vacations = sequelize.define('vacation', {
+        id:{
+            type: Sequelize.INTEGER,
+            primaryKey: true
+        },
         description: {
             type: Sequelize.STRING
         },
@@ -13,6 +17,9 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING
         },
         img: {
+            type: Sequelize.STRING
+        },
+        imgPath: {
             type: Sequelize.STRING
         },
         price: {

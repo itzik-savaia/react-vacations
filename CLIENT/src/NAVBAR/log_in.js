@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -15,6 +15,7 @@ import axios from 'axios';
 //redux
 import { connect } from 'react-redux';
 import { useSelector, useDispatch, } from 'react-redux';
+import { user_username, user_password, user_token } from '../actions/userActions'
 
 
 
@@ -46,15 +47,16 @@ const useStyles = makeStyles(theme => ({
 
 
 function Log_In() {
-    const classes = useStyles();
-    const [username, setUsername] = useState('')
-    const [password, setPassword] = useState('')
-    const dispatch = useDispatch();
+    var classes = useStyles();
+    var [username, setUsername] = useState('')
+    var [password, setPassword] = useState('')
+    var [accessToken, setAccessToken] = useState('')
+    var dispatch = useDispatch();
 
     // const getUsers = () => dispatch(fetch_Users());
-    let OnSubmitLog_In = async (e) => {
+    var OnSubmitLog_In = async (e) => {
         e.preventDefault();
-        const data = { username, password }
+        var data = { username, password }
         await axios.post("http://localhost:4000/users/signin", data, {
         }).then((response) => {
             localStorage.setItem('token', response.data.accessToken)
@@ -121,15 +123,17 @@ function Log_In() {
             </div>
         </Container>
     );
+
 }
 function mapStateToProps(state) {
-    console.log(state);
-    // const { FollowCounter } = state
-    // return { followcounter: state.followcounter }
+    const { user_username } = state
+    return {
+    }, console.log(state);
 }
+
 function mapDispachToProps(dispatch) {
     return {
-        // followUP: (followplus) => dispatch(followplus),
+     
         // getVacations: (fetch_Vacations) => dispatch(fetch_Vacations),
         // getUsers: (fetch_Users) => dispatch(fetch_Users),
     }
