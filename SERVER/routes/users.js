@@ -9,7 +9,7 @@ const File = require('../Servises/controller/file.controller');
 
 
 
-router.get('/', controller.allusers);
+router.get('/all', [authJwt.verifyToken], controller.allusers);
 
 router.post('/signup', [verifySignUp.checkDuplicateUserNameOrEmail, verifySignUp.checkRolesExisted], controller.signup);
 
@@ -17,9 +17,6 @@ router.post('/signin', controller.signin);
 
 router.get('/user', [authJwt.verifyToken], controller.userContent);
 
-
-//PMorAdmin
-// router.post('/admin/upload', controller.adminSendFile);
 router.post('/admin/upload', File, async (req, res, next) => {
     try {
         let body = req.body;
@@ -33,6 +30,8 @@ router.post('/admin/upload', File, async (req, res, next) => {
 
 });
 router.delete('/admin/delete/:id', controller.adminDelete)
+
+router.put('/admin/put/:id', controller.adminChangeVacation)
 
 router.get('/pm', [authJwt.verifyToken, authJwt.isPmOrAdmin], controller.managementBoard);
 

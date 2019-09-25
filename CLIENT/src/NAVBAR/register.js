@@ -11,7 +11,6 @@ import Container from '@material-ui/core/Container';
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 import axios from 'axios';
 //redux
-import { connect } from 'react-redux';
 import { useSelector, useDispatch, } from 'react-redux';
 
 const useStyles = makeStyles(theme => ({
@@ -127,9 +126,6 @@ function SingUp() {
                                 autoComplete="current-password"
                                 required
                             /></Grid>
-                        <Link to="/users/login" variant="body2">
-                            Already have an account? Sign in
-                        </Link>
                         <Button
                             type="submit"
                             fullWidth
@@ -137,6 +133,9 @@ function SingUp() {
                             color="primary"
                             className={classes.submit}>Sign Up
                         </Button>
+                        <Link to="/users/login" variant="body2">
+                            Already have an account? Sign in
+                        </Link>
                     </Grid>
 
 
@@ -145,17 +144,6 @@ function SingUp() {
         </Container>
     );
 }
-function mapStateToProps(state) {
-    console.log(state);
-    const { name, lname, username, password, roles } = state
-    return { followcounter: state.followcounter }
-}
-function mapDispachToProps(dispatch) {
-    return {
-        // followUP: (followplus) => dispatch(followplus),
-        // getVacations: (fetch_Vacations) => dispatch(fetch_Vacations),
-        // getUsers: (fetch_Users) => dispatch(fetch_Users),
-    }
-}
 
-export default connect(mapStateToProps, mapDispachToProps)(SingUp)
+
+export default (SingUp)

@@ -1,5 +1,6 @@
-import React from 'react';
-import LogIn from './log_in';
+import React, { useState } from 'react';
+import Login from './log_in';
+import Logout from './logout';
 import Register from './register';
 import Vacation from './vacation';
 import Dashboard from './Dashboard/Dashboard';
@@ -10,10 +11,9 @@ import Toolbar from '@material-ui/core/Toolbar';
 import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Button from '@material-ui/core/Button';
-import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Route, Link, Redirect, withRouter, Switch } from "react-router-dom";
 //redux
-import { connect } from 'react-redux';
-import { useSelector, useDispatch, } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 
 
 const useStyles = makeStyles(theme => ({
@@ -23,60 +23,76 @@ const useStyles = makeStyles(theme => ({
 }),
 );
 
-function nav() {
-    // const dispatch = useDispatch();
-    // const getUsers = () => dispatch(fetch_Users());
-
-    
+function Nav(props) {
+    var dispatch = useDispatch();
+    const {
+        username,
+        islogin = false,
+        role = 2,
+    } = useSelector(state => ({
+        ...state.combineReducers,
+        ...state.userReducer
+    }));
+    const logout = () => {
+        localStorage.clear()
+        dispatch({ type: 'USER_LOGOUT' });
+        console.log("cliasdk");
+        props.history.push("/users/login/")
+    }
     return (
         <Router>
-
             <div>
                 <React.Fragment>
                     <CssBaseline />
-                    <AppBar position="relative">
-
+                    <AppBar position="relative" component="h1" variant="h6" color="inherit" >
                         <Toolbar>
-                            <CameraIcon className={nav.icon} />
-                            <Typography variant="h6" noWrap>
-                                <Link className="nav-link" color="inherit" to="/"><Button className={nav.button}>Vacation</Button></Link>
-                            </Typography >
-                            
-                            <Typography variant="h6" >
-                                <Link className="nav-link" to="/users/register/"><Button>Register</Button></Link>
-                            </Typography >
+                            <CameraIcon className={Nav.icon} />
+                            {islogin === true ?
+                                <>
+                                    <Typography variant="h6" noWrap>
+                                        <Link className="nav-link" to="/all"><Button className={Nav.button}>Vacation</Button></Link>
+                                    </Typography >
 
-                            <Typography variant="h6" >
-                                <Link className="nav-link" to="/users/login/"><Button>LogIn</Button></Link>
-                            </Typography >
+                                    {role == 2 ?
+                                        <Typography variant="h6" >
+                                            <Link className="nav-link" to="/admin/dashboard/"><Button>Dashboard</Button></Link>
+                                        </Typography >
+                                        : null}
 
-                            {/* admin */}
-                            <Typography variant="h6" >
-                                <Link className="nav-link" to="/admin/dashboard/"><Button>Admin-Dashboard</Button></Link>
-                            </Typography >
+                                    {islogin === true ?
+                                        <Typography variant="h6">{`Hellow:${username}`}</Typography >
+                                        : null}
 
+                                    <Typography variant="h6" className="ml-auto">
+                                        <Link className="nav-link" to="/users/logout/">
+                                            <Button onClick={logout}>Logout</Button>
+                                        </Link>
+                                    </Typography>
+
+                                </>
+                                :
+                                <>
+                                    <Typography variant="h6" className="ml-auto">
+                                        <Link className="nav-link" to="/users/register/">
+                                            <Button>Register</Button></Link>
+                                    </Typography >
+
+                                    <Typography variant="h6">
+                                        <Link className="nav-link" to="/users/login/" >
+                                            <Button>Log-In</Button></Link>
+                                    </Typography >
+                                </>
+                            }
                         </Toolbar>
                     </AppBar>
                 </React.Fragment>
 
-                <Route path="/" exact component={Vacation} />
-                <Route path="/users/register/" component={Register} />
-                <Route path="/users/login/" component={LogIn} />
+                <Route path="/all" component={Vacation} />
                 <Route path="/admin/dashboard/" component={Dashboard} />
+                <Route path="/users/register/" component={Register} />
+                <Route path="/users/login/" component={Login} />
+                <Route path="/users/logout/" component={Logout} />
             </div>
         </Router>
     )
-}
-function mapStateToProps(state) {
-    console.log(state);
-    return { IS_LOG_IN: state.IS_LOG_IN }
-}
-function mapDispachToProps(dispatch) {
-    return {
-        // followUP: (followplus) => dispatch(followplus),
-        // getVacations: (fetch_Vacations) => dispatch(fetch_Vacations),
-        // getUsers: (fetch_Users) => dispatch(fetch_Users),
-    }
-}
-
-export default connect(mapStateToProps, mapDispachToProps)(nav)
+} export default (Nav)

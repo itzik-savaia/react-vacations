@@ -1,9 +1,8 @@
-import React, { Fragment, useState, useEffect } from "react";
+import React, { Fragment, useState, useEffect, useContext, } from "react";
 import Button from "@material-ui/core/Button";
 import Card from "@material-ui/core/Card";
 import Fab from '@material-ui/core/Fab';
 import EditIcon from '@material-ui/icons/Edit';
-import DeleteIcon from '@material-ui/icons/Delete';
 import CardActions from "@material-ui/core/CardActions";
 import CardContent from "@material-ui/core/CardContent";
 import CardMedia from "@material-ui/core/CardMedia";
@@ -13,19 +12,22 @@ import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
 import Link from "@material-ui/core/Link";
-import Modal from '@material-ui/core/Modal';
 import FavoriteIcon from "@material-ui/icons/Favorite";
 import BottomNavigation from "@material-ui/core/BottomNavigation";
 import BottomNavigationAction from "@material-ui/core/BottomNavigationAction";
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import TextField from '@material-ui/core/TextField';
 import axios from "axios";
 import uploadedFile from './Dashboard/addVacationFrom';
-
+import DeleteIcon from '@material-ui/icons/Delete';
 
 //redux
-import { connect } from 'react-redux';
 import { useSelector, useDispatch, } from 'react-redux';
-import { fetch_Vacations } from '../actions/vacationActions';
-import { user_username } from "../actions/userActions";
+
 
 
 // Footer function
@@ -79,15 +81,32 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const Vacation = (props) => {
+  //material
   const classes = useStyles();
-  const [value, setValue] = React.useState(0);
+  const [open, setOpen] = React.useState(Boolean(false));
+  const [follows, sefollows] = React.useState(0);
+  //vacation
   const [vacation, setVacation] = useState([]);
-  var [vacation_id, setVacation_id] = useState('')
-  const dispatch = useDispatch();
+  //putcard
+  const [description, setDescription] = useState("");
+  const [destination, setDestination] = useState("");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+  const [price, setPrice] = useState("");
 
-  //----- redux and dispatch the action
-  // const username = () => dispatch(user_username());
-  // const followUP = () => dispatch(followplus());
+  //dispatch redux
+  const dispatch = useDispatch();
+  const {
+    role = 2,
+    username,
+    Vacations,
+  } = useSelector(state => ({
+    ...state.combineReducers,
+    ...state.userReducer,
+    ...state.vacationsReducer
+  }));
+
+  // ----- redux and dispatch the action
   const getVacations = () => dispatch(fetch_Vacations());
 
   useEffect(() => {
@@ -95,37 +114,59 @@ const Vacation = (props) => {
   }, [])
 
   function handleChange(event, newValue) {
-    setValue(newValue);
+    sefollows(newValue);
     alert('follow')
   }
-  var DELETE_Card = e => {
-    e.preventDefault();
-    let vacation_id
-    console.log(vacation_id);
-    var confirm = window.confirm('You are sure you want to delete ?');
-    if (confirm == true) {
-      axios.delete(`http://localhost:4000/users/admin/delete/${vacation_id}`)
-    } else {
-      alert("You pressed Cancel!")
-    }
 
-  }
-  const PUT_Card = async e => {
+
+  const PutCard = async e => {
     e.preventDefault();
-    await axios.put(`http://localhost:4000/users/admin/put/${Vacation.id}`)
-      .then({})
+    const data = { description, destination, fromDate, toDate, price }
+    console.log(data);
+    try {
+      await axios.put(`http://localhost:4000/users/admin/put/:${Vacation.id}`, data)
+    } catch (err) {
+      if (err.response.status === 500) {
+        console.log('There was a problem with the server');
+      } else {
+        console.log(err.response.data.msg);
+      }
+    }
   }
 
   useEffect(() => {
     axios.get(`http://localhost:4000/vacation`)
       .then(res => {
-        console.log(res.data);
+        // console.log(res.data);
         setVacation(res.data);
       })
       .catch(err => {
         console.log(err);
       });
   }, []);
+
+  const fetch_Vacations = () => {
+    return function (dispatch) {
+      axios.get('http://localhost:4000/vacation')
+        .then(res => {
+          console.log(res);
+          dispatch({ type: 'FETCH_VACATIONS', payload: res.data });
+        }).catch(err => {
+          console.log(err);
+        })
+    }
+  };
+
+  const DeleteCard = (e) => {
+    e.preventDefault();
+    const id = e.target.id
+    const confirm = window.confirm(`You are sure you want to delete vacation number ?${id}`);
+    if (confirm == true) {
+      axios.delete(`http://localhost:4000/users/admin/delete/${id}`)
+    } else {
+      alert("You pressed Cancel!")
+    }
+  };
 
   return (
     <Fragment>
@@ -138,7 +179,7 @@ const Vacation = (props) => {
 
           <Container maxWidth="sm">
             <Typography component="h1" variant="h2" align="center" color="textPrimary" gutterBottom>
-              Vacation
+              Vacations
               {/* <vacations_Store /> */}
             </Typography>
           </Container>
@@ -153,20 +194,116 @@ const Vacation = (props) => {
                 <Grid key={vacation.id} item xs={12} md={6} lg={4}>
 
                   <Card className={classes.card}>
-                    <Grid>
+                    <Grid className="ml-auto">
+                      {role == 2 ? <>
 
-                      <Fab color="secondary" aria-label="edit" className={classes.fab} onClick={PUT_Card} key={vacation.id}>
-                        <EditIcon />
-                      </Fab>
-                      <Fab aria-label="delete"
-                        className={classes.fab}
-                        onClick={DELETE_Card}
-                        onChange={(e) => setVacation_id(e.target.value)}
-                        key={vacation.id}
-                        value={vacation.id}>
-                        <DeleteIcon />
-                      </Fab>
+                        <Button color="secondary"
+                          aria-label="edit"
+                          className={classes.fab}
+                          onClick={() => setOpen(true)} //open modal
+                          key={vacation.id}>
+                          <div>
+                            <EditIcon />
 
+                            <form onSubmit={PutCard} className={classes.form}>
+                              <Dialog open={open}
+                                aria-labelledby="form-dialog-title">
+                                <DialogTitle id="form-dialog-title">Change card</DialogTitle>
+                                <DialogContent>
+                                  <DialogContentText>
+                                    Update card Values ​​need to be entered.
+                                </DialogContentText>
+
+                                  <TextField
+                                    variant="outlined"
+                                    className={classes.textField}
+                                    fullWidth
+                                    value={description}
+                                    onInput={(e) => setDescription(e.target.value)}
+                                    name="description"
+                                    label="description"
+                                    type="description"
+                                    id="description"
+                                    autoComplete="uname" />
+
+                                  <TextField
+                                    variant="outlined"
+                                    className={classes.textField}
+                                    fullWidth
+                                    value={destination}
+                                    onInput={(e) => setDestination(e.target.value)}
+                                    name="destination"
+                                    label="destination"
+                                    type="destination"
+                                    id="destination"
+                                    autoComplete="uname" />
+
+                                  <TextField
+                                    variant="outlined"
+                                    className={classes.textField}
+                                    fullWidth
+                                    value={fromDate}
+                                    onInput={(e) => setFromDate(e.target.value)}
+                                    name="fromDate"
+                                    label="fromDate"
+                                    type="fromDate"
+                                    id="fromDate"
+                                    autoComplete="uname" />
+
+                                  <TextField
+                                    variant="outlined"
+                                    className={classes.textField}
+                                    fullWidth
+                                    value={toDate}
+                                    onInput={(e) => setToDate(e.target.value)}
+                                    name="toDate"
+                                    label="toDate"
+                                    type="toDate"
+                                    id="toDate"
+                                    autoComplete="uname" />
+
+                                  <TextField
+                                    variant="outlined"
+                                    className={classes.textField}
+                                    fullWidth
+                                    value={price}
+                                    onInput={(e) => setPrice(e.target.value)}
+                                    name="price"
+                                    label="price"
+                                    type="price"
+                                    id="price"
+                                    autoComplete="uname" />
+
+                                </DialogContent>
+                                <DialogActions>
+                                  <Button
+                                    onClick={() => setOpen(false)}
+                                    fullWidth
+                                    variant="contained"
+                                    color="secondary">Cancel
+                                  </Button>
+                                  <Button
+                                    type="submit"
+                                    fullWidth
+                                    variant="contained"
+                                    color="primary"
+                                    className={classes.submit}>Send
+                                  </Button>
+                                </DialogActions>
+                              </Dialog>
+                            </form>
+                          </div>
+                        </Button >
+
+
+                        <Button aria-label="delete"
+                          id={vacation.id}
+                          value={vacation.id}
+                          key={vacation.id}
+                          onClick={DeleteCard}>
+                          <DeleteIcon id={vacation.id} onClick={DeleteCard} pathLength={vacation.id}></DeleteIcon>
+                        </Button>
+                      </> : null}
                     </Grid>
                     {uploadedFile ? (
                       <CardMedia
@@ -195,20 +332,23 @@ const Vacation = (props) => {
                     <CardActions>
                       <Button size="small" color="primary">
                         <Typography>
-                          Follows={props.followcounter}
+                          Follows={vacation.follower}
                         </Typography>
                       </Button>
                       {/* countert */}
                       <BottomNavigation
-                        value={value}
+                        value={follows}
                         onChange={handleChange}
                         className={classes.root}
-                      >
-                        <BottomNavigationAction
-                          label="Follow"
-                          value="Follow"
-                          icon={<FavoriteIcon />}
-                        />
+                      >{role == 1 ?
+                        <>
+                          <BottomNavigationAction
+                            label="Follow"
+                            value="Follow"
+                            icon={<FavoriteIcon />}
+                          />
+                        </>
+                        : null}
                       </BottomNavigation>
                     </CardActions>
                   </Card>
@@ -237,22 +377,4 @@ const Vacation = (props) => {
     </Fragment >
   );
 }
-function mapStateToProps(state) {
-  console.log(state);
-  const {
-    FollowCounter,
-  } = state
-  return {
-    followcounter: state.followcounter,
-    vacations: state.vacations,
-  }
-}
-function mapDispachToProps(dispatch) {
-  return {
-    username: (user_username) => dispatch(user_username()),
-    // followUP: (followplus) => dispatch(followplus),
-    getVacations: (fetch_Vacations) => dispatch(fetch_Vacations),
-  }
-}
-
-export default connect(mapStateToProps, mapDispachToProps)(Vacation)
+export default (Vacation)

@@ -15,6 +15,7 @@ exports.signup = (req, res) => {
     console.log("application/json");
     console.log("Processing func -> SignUp");
     console.log(req.body);
+
     User.create({
         name: req.body.name,
         username: req.body.username,
@@ -46,18 +47,33 @@ exports.signup = (req, res) => {
 exports.signin = (req, res) => {
     console.log("Sign-In");
     console.log(req.body);
+    console.log('body.username', req.body.username)
+    console.log('body.password', req.body.password)
+
     User.findOne({
         where: {
             username: req.body.username
-        }
+        },
+        include: [{
+            model: Role,
+            attributes: ['id', 'name'],
+            through: {
+                attributes: ['userId', 'roleId'],
+            }
+        }]
+
     }).then(user => {
         if (!user) {
-            return res.status(404).send('User Not Found.');
+            return res.status(405).send('User Not Found.');
         }
         var token = jwt.sign({ id: user.id }, config.secret, {
             expiresIn: 86400 // expires in 24 hours
         });
-        res.status(200).send({ auth: true, accessToken: token });
+        res.status(200).send({
+            auth: true, accessToken: token,
+            "user": user,
+
+        });
         console.log(req.body.username, { auth: true, accessToken: token });
         console.log(">>>>>>>>Sign-In Sucsess")
     }).catch(err => {
@@ -138,12 +154,44 @@ exports.adminSendFile = (body, file, File) => {
 };
 
 exports.adminDelete = (req, res) => {
-    let id = req.params
-    console.log(id);
+    let id = req.params.id
+    console.log('vacationI =', id);
+    res.send('Deleted successfully =' + id)
     vacations.destroy({
-        where: { id },
+        where: {
+            id: id //this will be your id that you want to delete
+        }
+    }).then(function (rowDeleted) { // rowDeleted will return number of rows deleted
+        if (rowDeleted === 1) {
+            console.log('Deleted successfully');
+            res.send('Deleted successfully')
+        }
+    }, function (err) {
+        console.log(err);
+        res.status(500).send('Error -> ' + err);
     });
 
+}
+exports.adminChangeVacation = (req, res) => {
+    console.log(req.body, 'req.body===Newput');
+    let body = req.body
+    let { description, destination, fromDate, toDate, price } = body;
+
+    vacations.update({
+        description: description,
+        destination: destination,
+        fromDate: fromDate,
+        toDate: toDate,
+        price: price,
+    }, {
+        where: { id: id }
+    }).success(res =>
+        handleResult(res),
+        res.send(res, 'PUT successfully')
+    ).error(err =>
+        console.log(err),
+        res.status(500).send('Error -> ' + err)
+    )
 }
 
 exports.managementBoard = (req, res) => {
@@ -189,48 +237,4 @@ exports.allusers = (req, res) => {
         res.status(500).send('Error to find allusers -> ' + err);
     });
 }
-// exports.oneusers = (req, res) => {
-//     console.log("Processing func -> Get-oneusers");
-//     let userId = req.params
-//     console.log(userId);
-
-//     User.findbyid({
-//         where: { id: req.userId }
-//     }).then((users) => {
-//         res.send(users)
-//         console.log(users);
-//     })
-
-// }
-
-
-// exports.oneuser = (req, res) => {
-//     console.log("Processing func -> Get-allusers");
-//     User.findAll().then(function (users) {
-//         res.send(users)
-//         console.log(users);
-//     }).catch(err => {
-//         res.status(500).send('Error to find allusers -> ' + err);
-//     });
-// }
-// exports.vacation = (req, res) => {
-//     console.log("Processing func -> Get-vacation");
-//     // console.log(vacations);
-
-//     vacations.findOne({
-//         where: { description: vacations },
-//         attributes: ['id',
-//             'description',
-//             'destination',
-//             'img',
-//             'price',
-//             'createdAt',
-//             'updatedAt'],
-//     }).then(function (vacations) {
-//         console.log(vacations);
-//         res.send(vacations)
-//     }).catch(err => {
-//         res.status(500).send('Error to find vacation ->' + err);
-//     });
-// }
 

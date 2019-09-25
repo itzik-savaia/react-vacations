@@ -4,7 +4,6 @@ import NAVbar from './NAVBAR/nav'
 //store
 import { store } from './store';
 import { Provider } from 'react-redux';
-//actions
 
 const App = () => (
 

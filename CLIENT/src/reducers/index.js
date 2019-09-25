@@ -1,11 +1,9 @@
 import { combineReducers } from 'redux';
-import { AllVacations, } from './vacationsReducer';
-import { alert, userConnect } from './User-followReducer';
+import { Vacations, } from './vacationsReducer';
+import { userReducer } from './UserReducer';
 
 
 export default combineReducers({
-  AllVacations,
-  userConnect,
-  alert
-
+  Vacations,
+  userReducer,
 });

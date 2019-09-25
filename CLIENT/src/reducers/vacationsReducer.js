@@ -1,22 +1,21 @@
-import { FETCH_VACATIONS, FOLLOW_PLUS, FOLLOW_MINUS } from '../actions/types';
 
 const initialState = {
     Vacations: [],
-
 };
 
-export const AllVacations = (state = initialState.Vacations, action) => {
+export function Vacations(state = initialState, action) {
+    // console.log('Vacations-action', action.payload);
     switch (action.type) {
-        case FETCH_VACATIONS:
+        case 'FETCH_VACATIONS':
             return {
                 ...state,
                 Vacations: action.payload
             };
+        case 'DELETE':
+            return {
+                deleteCard: action.payload
+            }
         default:
             return state;
     }
 }
-
-const vacationReducer = { AllVacations }
-
-export default vacationReducer

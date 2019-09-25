@@ -51,7 +51,7 @@ const AddVacationFrom = (props) => {
     const [file, setFile] = useState("");
     const [filename, setFilename] = useState("Choose File");
     const [uploadedFile, setUploadedFile] = useState({});
-    
+
 
 
 
@@ -77,14 +77,14 @@ const AddVacationFrom = (props) => {
         formData.append('price', price);
         console.log(Array.from(formData));
         try {
-            const res = await axios.post('http://localhost:4000/users/admin/upload', formData,{
-            headers:{'Content-Type':'multipart/form-data'}
+            const res = await axios.post('http://localhost:4000/users/admin/upload', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
             });
             const { fileName, filePath } = res.data;
             setUploadedFile({ fileName, filePath });
-            console.log('fileName, filePath',res.data);
-            
-            alert('Uploaded'+'-'+fileName)
+            console.log('fileName, filePath', res.data);
+
+            alert('Uploaded' + '-' + fileName)
 
         } catch (err) {
             if (err.response.status === 500) {
@@ -99,7 +99,7 @@ const AddVacationFrom = (props) => {
         <Container component="main" maxWidth="xs">
 
             <div className={classes.paper}>
-                
+
                 <Typography component="h1" variant="h5">
                     Add Vacation
                     </Typography>
@@ -200,14 +200,14 @@ const AddVacationFrom = (props) => {
                         </Button>
 
                         </Grid>
-                        
+
                     </Grid>
 
 
                 </form>
 
             </div>
-            
+
         </Container >
 
     );

@@ -1,21 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext, } from 'react';
+import { BrowserRouter as Router, Route, Link, Redirect, withRouter } from "react-router-dom";
+
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
 import Grid from '@material-ui/core/Grid';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
-import { BrowserRouter as Link } from "react-router-dom";
 import axios from 'axios';
 //redux
-import { connect } from 'react-redux';
 import { useSelector, useDispatch, } from 'react-redux';
-import { user_username, user_password, user_token } from '../actions/userActions'
 
 
 
@@ -45,25 +42,71 @@ const useStyles = makeStyles(theme => ({
 }));
 
 
-
-function Log_In() {
+function Login(props) {
     var classes = useStyles();
-    var [username, setUsername] = useState('')
-    var [password, setPassword] = useState('')
-    var [accessToken, setAccessToken] = useState('')
     var dispatch = useDispatch();
+    console.log(props, 'props');
 
-    // const getUsers = () => dispatch(fetch_Users());
-    var OnSubmitLog_In = async (e) => {
-        e.preventDefault();
+    const {
+        username,
+        password,
+        islogin = true
+    } = useSelector((state) => ({
+        ...state.combineReducers,
+        ...state.userReducer,
+    }));
+
+
+    const OnSubmitLog_In = (event) => {
+        event.preventDefault();
         var data = { username, password }
-        await axios.post("http://localhost:4000/users/signin", data, {
-        }).then((response) => {
-            localStorage.setItem('token', response.data.accessToken)
-            console.log('response data', response.data)
-            console.log('response config', response.config.data)
-            alert(JSON.stringify(response.config.data))
-        }, (error) => { console.log('error', error) });
+        console.log(data, 'data');
+        console.log('event', event);
+        console.log('props', props);
+
+        axios.post("http://localhost:4000/users/signin", data).then((res) => {
+            let roles = res.data.user.roles[0].id
+            if (localStorage.getItem('token', res.data.accessToken && islogin)) {
+                localStorage.clear()
+                dispatch({ type: 'USER_LOGOUT' });
+            }
+            if (localStorage.getItem('token', res.data.accessToken)) {
+                alert('user alredy in')
+                dispatch({ type: 'ALREDY_IN' });
+                props.history.push('/users/login/')
+
+            } else if (roles === 2 || 3) {
+                dispatch({ type: 'ADMIN', payload: res.data });
+                localStorage.setItem('token', res.data.accessToken)
+                console.log('roles', res.data.user.roles);
+                props.history.push('/all')
+
+            } else if (roles === 1) {
+                dispatch({ type: 'LOGIN', payload: res.data });
+                localStorage.setItem('token', res.data.accessToken)
+                console.log('res data', res.data)
+                console.log('roles', res.data.user)
+                console.log('rolesrolesrolesrolesroles', roles)
+                props.history.push('/all')
+
+            }
+        }, (error) => {
+            console.log('error', error)
+            if (405) {
+                alert('user not found')
+                dispatch({ type: 'NO_ACCESS' });
+            } else if (500) {
+                alert('user not found try again')
+                dispatch({ type: 'NO_ACCESS' });
+            }
+        });
+    }
+
+    function username_update(event) {
+        dispatch({ type: 'USER_NAME', payload: event.target.value })
+    }
+    function password_update(event) {
+        dispatch({ type: 'USER_PASSWORD', payload: event.target.value })
     }
 
     return (
@@ -75,7 +118,6 @@ function Log_In() {
                 </Avatar>
                 <Typography component="h1" variant="h5">
                     Sign in</Typography>
-
                 <form onSubmit={OnSubmitLog_In} className={classes.form}>
                     <Grid container spacing={2} className={classes.textField}>
                         <TextField
@@ -83,7 +125,8 @@ function Log_In() {
                             margin="normal"
                             fullWidth
                             value={username}
-                            onChange={(e) => setUsername(e.target.value)}
+                            onChange={username_update}
+                            onInput={() => dispatch({ type: 'USER_NAME', payload: username })}
                             id="username"
                             label="User Name"
                             name="username"
@@ -95,7 +138,8 @@ function Log_In() {
                             margin="normal"
                             fullWidth
                             value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            onChange={password_update}
+                            onInput={() => dispatch({ type: 'USER_PASSWORD', payload: password })}
                             name="password"
                             label="Password"
                             type="password"
@@ -103,40 +147,21 @@ function Log_In() {
                             autoComplete="current-password"
                         />
 
-                        <Grid item>
-                            <Link to="/users/register" variant="body2">
-                                Already have an account? register
-                        </Link>
-                        </Grid>
-
                         <Button
                             type="submit"
                             fullWidth
                             variant="contained"
                             color="primary"
-                            className={classes.submit}
-                        >
-                            Sign In
-                    </Button>
+                            className={classes.submit}>Sign In
+                        </Button>
+
+                        <Link to="/users/register" variant="body2">
+                            Already have an account? register
+                        </Link>
                     </Grid>
                 </form>
             </div>
         </Container>
     );
-
 }
-function mapStateToProps(state) {
-    const { user_username } = state
-    return {
-    }, console.log(state);
-}
-
-function mapDispachToProps(dispatch) {
-    return {
-     
-        // getVacations: (fetch_Vacations) => dispatch(fetch_Vacations),
-        // getUsers: (fetch_Users) => dispatch(fetch_Users),
-    }
-}
-
-export default connect(mapStateToProps, mapDispachToProps)(Log_In)
+export default (Login)
