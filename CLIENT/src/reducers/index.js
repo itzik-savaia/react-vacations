@@ -1,6 +1,5 @@
 import { combineReducers } from 'redux';
-import { Vacations, } from './vacationsReducer';
-import { userReducer } from './UserReducer';
+import { Vacations, } from '.';
 
 
 export default combineReducers({
